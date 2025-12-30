@@ -43,9 +43,18 @@ if ingredients_list:
 # New section to display smoothiefruit nutrition information
 import requests
 
-smoothiefruit_response = requests.get(
-    "https://smoothiefroot.com/api/fruit/watermelon",
-    timeout=10,
-    verify=False
-)
-st.json(smoothiefruit_response.json())
+
+
+url = "https://smoothiefroot.com/api/fruit/watermelon"
+resp = requests.get(url, timeout=10)
+
+st.write("Status:", resp.status_code)
+st.write("Content-Type:", resp.headers.get("content-type", ""))
+# Show a bit of the raw response so you can see what it really is
+st.text(resp.text[:500])
+
+if resp.ok and "application/json" in resp.headers.get("content-type", ""):
+    data = resp.json()
+    st.dataframe(data=data, use_container_width=True)
+else:
+    st.error("API did not return JSON (see status/text above).")
