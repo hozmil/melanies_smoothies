@@ -46,15 +46,13 @@ import requests
 
 
 url = "https://smoothiefroot.com/api/fruit/watermelon"
-resp = requests.get(url, timeout=10)
+headers = {
+    "Accept": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
 
-st.write("Status:", resp.status_code)
-st.write("Content-Type:", resp.headers.get("content-type", ""))
-# Show a bit of the raw response so you can see what it really is
-st.text(resp.text[:500])
+smoothiefruit_response = requests.get(url, headers=headers, timeout=10)
+smoothiefruit_response.raise_for_status()
 
-if resp.ok and "application/json" in resp.headers.get("content-type", ""):
-    data = resp.json()
-    st.dataframe(data=data, use_container_width=True)
-else:
-    st.error("API did not return JSON (see status/text above).")
+st.dataframe(data=smoothiefruit_response.json(), use_container_width=True)
+
