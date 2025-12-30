@@ -42,22 +42,11 @@ if ingredients_list:
 
 # New section to display smoothiefruit nutrition information
 import requests
-url = "https://smoothiefroot.com/api/fruit/watermelon"
 
-headers = {
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Referer": "https://smoothiefroot.com/",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-}
+smoothiefroot_response = requests.get(
+    "https://www.smoothiefroot.com/api/fruit/watermelon",
+    headers={"Accept": "application/json", "User-Agent": "Mozilla/5.0"},
+    timeout=10
+)
 
-resp = requests.get(url, headers=headers, timeout=10)
-
-st.write("Status:", resp.status_code)
-st.write("Content-Type:", resp.headers.get("content-type", ""))
-st.text(resp.text[:300])
-
-if resp.ok and "application/json" in resp.headers.get("content-type", ""):
-    st.dataframe(resp.json(), use_container_width=True)
-else:
-    st.error("Still blocked (not returning JSON).")
+sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
