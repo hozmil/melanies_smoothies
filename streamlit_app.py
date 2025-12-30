@@ -1,17 +1,17 @@
 import streamlit as st
+import requests
+from urllib.parse import quote
 from snowflake.snowpark.functions import col
 
 st.title(f"Customise Your Smoothie :cup_with_straw: {st.__version__}")
 st.write("Choose the fruits you want in your custom Smoothie.")
 
-# ✅ create Snowflake session FIRST (works outside SiS)
 cnx = st.connection("snowflake")
 session = cnx.session()
 
 name_on_order = st.text_input("Name on Smoothie:")
 st.write("The name on your Smoothie will be:", name_on_order)
 
-# ✅ multiselect needs a Python list (not a Snowpark DF)
 fruit_rows = (
     session.table("smoothies.public.fruit_options")
     .select(col("FRUIT_NAME"))
@@ -26,7 +26,22 @@ ingredients_list = st.multiselect(
 )
 
 if ingredients_list:
-    ingredients_string = " ".join(ingredients_list)
+    ingredients_string = ""
+
+    for fruit_chosen in ingredients_list:
+        ingredients_string += fruit_chosen + " "
+
+        fruit_for_url = quote(fruit_chosen.lower())
+        smoothiefroot_response = requests.get(
+            f"https://www.smoothiefroot.com/api/fruit/{fruit_for_url}",
+            headers={"Accept": "application/json", "User-Agent": "Mozilla/5.0"},
+            timeout=10
+        )
+
+        sf_df = st.dataframe(
+            data=smoothiefroot_response.json(),
+            use_container_width=True
+        )
 
     st.write(ingredients_string)
 
@@ -39,14 +54,3 @@ if ingredients_list:
     if time_to_insert:
         session.sql(my_insert_stmt).collect()
         st.success("Your Smoothie is ordered!", icon="✅")
-
-# New section to display smoothiefruit nutrition information
-import requests
-
-smoothiefroot_response = requests.get(
-    "https://www.smoothiefroot.com/api/fruit/watermelon",
-    headers={"Accept": "application/json", "User-Agent": "Mozilla/5.0"},
-    timeout=10
-)
-
-sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
