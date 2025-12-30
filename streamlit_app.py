@@ -42,7 +42,6 @@ if ingredients_list:
 
 # New section to display smoothiefruit nutrition information
 import requests
-
 url = "https://smoothiefroot.com/api/fruit/watermelon"
 
 headers = {
@@ -61,5 +60,4 @@ st.text(resp.text[:300])
 if resp.ok and "application/json" in resp.headers.get("content-type", ""):
     st.dataframe(resp.json(), use_container_width=True)
 else:
-    st.error("Still blocked (not returning JSON).")True)
-
+    st.error("Still blocked (not returning JSON).")
